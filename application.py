@@ -12,6 +12,11 @@ socketio = SocketIO(app)
 def index():
     return render_template("index.html")
 
+@socketio.on("submit channel")
+def channel(data):
+    channel = data["channelName"]
+    emit("announce channel", {"channel": channel}, broadcast=True)
+
 # Must add line below because of SocketIO bug: https://github.com/miguelgrinberg/Flask-SocketIO/issues/817
 # Instead of "flask run", application is inialized through "python3 application.py"
 if __name__ == "__main__":
