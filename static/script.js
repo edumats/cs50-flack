@@ -2,30 +2,89 @@ document.addEventListener('DOMContentLoaded', () => {
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-    // When connected, configure buttons
+    // Prevents Enter key to submit the input
+    document.getElementById('channelForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+    })
+
+    // Prevents default submission and sends input data to server
+    document.getElementById('chatForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const messageField = document.getElementById('chatInput');
+        socket.emit('receive message', {'messageField': messageField.value});
+        messageField.value = '';
+    })
+
+    /*
+    // Prevents Enter key to submit all form inputs
+    let formList = document.querySelectorAll('.inputForm');
+    formList.forEach(form => {
+        console.log('deactivating');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+        });
+    })
+    */
+    // When connected
     socket.on('connect', () => {
-        document.getElementById('submitChannel').onclick= () => {
+        // List channels
+        socket.emit('available channels');
+
+        //Send message
+        socket.emit('message', 'User has connected');
+
+        // Listens for messages submissions to server
+
+        document.getElementById('sendButton').onclick = () => {
+            const messageField = document.getElementById('chatInput').value;
+            socket.emit('receive message', {'messageField': messageField});
+        }
+
+        //document.getElementById('sendButton').onclick = sendChannel;
+
+        // Listens for channel name submissions
+        document.getElementById('submitChannel').onclick = () => {
             const channelName = document.getElementById('channelName').value;
             socket.emit('submit channel', {'channelName': channelName});
         }
+        /*
+        // Sends form content to server
+        function sendChannel() {
+            const channelName = document.getElementById('channelName').value;
+            console.log("content is " + channelName);
+            socket.emit('submit channel', {'channelName': channelName});
+        }
+        */
     })
 
-    socket.on('announce channel', data => {
+    // Display sent messages in page
+    socket.on('return message', message => {
         const li = document.createElement('li');
-        li.innerHTML = '${data.channelName}'
-        document.querySelector('#channelList').append(li);
+        li.innerHTML = message;
+        document.getElementById('messagesList').append(li);
     })
 
+    // Displays channel List on page
+    socket.on('receive channels', data => {
+        document.querySelector('#channelList').innerHTML = '';
+        data.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = item;
+            document.querySelector('#channelList').append(li);
+        })
+    })
+
+    // Listens for clicks on add channel button
     document.getElementById('addChannelButton').addEventListener('click', () => {
         $('#addChannelModal').modal();
         validInput('#submitChannel','#channelName');
     })
 
+    // Listens for clicks on button
     document.getElementById('addDisplayName').onclick= () => {
         login();
     };
 });
-
 
 // For activating login modal
 function login() {
@@ -49,9 +108,9 @@ function login() {
     };
 }
 
-// Prevents empty inputs being sent
+// Prevents empty inputs being sent in prompts.
+// Input = response from user, button = element that triggers submission
 function validInput(button, input) {
-    console.log('validating');
     // Disables submit button by default
     document.querySelector(button).disabled = true;
 
