@@ -100,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedChannel = link.getAttribute('data-channel');
                 socket.emit('join channel', selectedChannel);
                 currentChannel = selectedChannel;
-                socket.emit('receive message', {'messageField': 'User entered chat'}, room=currentChannel);
             }
         })
     })

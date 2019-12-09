@@ -32,10 +32,12 @@ def channel(data):
 
 @socketio.on("join channel")
 def joinChannel(data):
+    print(previousChannel)
     if previousChannel != None:
         leave_room(previousChannel)
     join_room(data)
-    previousChannel = data
+    # This variable breaks the sending message
+    #previousChannel = data
     emit('return message', 'User has entered the room ' + data)
 
 # For sending messages
