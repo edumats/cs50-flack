@@ -48,17 +48,20 @@
                 <!-- Left Side bar -->
                 <nav class="col-md-2 bg-light sidebar">
                     <h2>Channels</h2>
-                    <ul id="channelList">
-                    </ul>
+                    <div id="channelList" class="list-group">
+                    </div>
                     <button id="addChannelButton">Add Channel</button>
                 </nav>
                 <!-- Chat contents -->
                 <main class="col-md-10">
                     Chat contents
-                    <ul id="messagesList"></ul>
-                    <form id="chatForm" class="inputForm">
-                        <input id="chatInput" autocomplete="off" autofocus><button id="sendButton" type="button" class="btn btn-primary">Send</button>
-                    </form>
+                    <div id="messagesList" class="list-group"></div>
+                    <div class="input-group">
+                        <input id="chatInput" autocomplete="off" autofocus/>
+                        <div class="input-group-append">
+                            <button id="sendButton" type="button" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
                 </main>
             </div>
         </div>
@@ -80,8 +83,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="result">
         </div>
 
         <!-- Pop up display for prompting channel name to user -->
