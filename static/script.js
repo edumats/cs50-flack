@@ -19,13 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // When connected
     socket.on('connect', () => {
-
-        console.log(currentChannel);
+        console.log('Connected on ' + currentChannel);
         // List channels
         socket.emit('available channels');
 
-        // Join channel General
-        //socket.emit('join channel', {'currentChannel': currentChannel});
+        // Join current channel
+        socket.emit('join channel', {'currentChannel': currentChannel});
 
     })
 
@@ -36,7 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listens for clicks and submits message to server
     document.getElementById('sendButton').onclick = () => {
+        currentChannel = localStorage.getItem('channel');
         const messageField = document.getElementById('chatInput');
+        console.log('Currently in ' + currentChannel);
         socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel});
         messageField.value = '';
     }
@@ -44,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sends message through Enter key
     document.getElementById('chatInput').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
+            currentChannel = localStorage.getItem('channel');
             const messageField = document.getElementById('chatInput');
             if (messageField.value.length > 0) {
                 console.log('Currently in ' + currentChannel);
@@ -55,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display sent messages in page
     socket.on('return message', message => {
+        console.log('Receiving message ' + currentChannel);
         const p = document.createElement('p');
         user = localStorage.getItem('username');
         p.innerHTML = '<strong>' + '@' + user + '</strong>' + ' ' + message;
@@ -101,7 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
         })
 
     socket.on('return join channel', data => {
-        currentChannel = localStorage.setItem('channel', data);
+
+        localStorage.setItem('channel', data);
+        console.log('Returning channel ' + data);
     })
 
         // Listens for clicks in each link in channel list and joins channel
@@ -109,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             link.onclick = () => {
                 selectedChannel = link.getAttribute('data-channel');
                 socket.emit('join channel', {'currentChannel': selectedChannel});
-                currentChannel = localStorage.setItem('channel', selectedChannel);
+                localStorage.setItem('channel', selectedChannel);
             }
         })
     })
