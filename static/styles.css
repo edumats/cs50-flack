@@ -1,9 +1,4 @@
 .container-fluid main {
     height: 90vh;
+    overflow: scroll;
 }
-
-/*.container-fluid nav {
-    background-color: green;
-}
-
-*/

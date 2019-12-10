@@ -30,15 +30,19 @@ def channel(data):
     channelList.append(channel)
     emit("receive channels", channelList, broadcast=True)
 
+# For joining a channel
 @socketio.on("join channel")
 def joinChannel(data):
-    print(previousChannel)
+    global previousChannel
+    currentChannel = data['currentChannel']
     if previousChannel != None:
         leave_room(previousChannel)
-    join_room(data)
-    # This variable breaks the sending message
-    #previousChannel = data
-    emit('return message', 'User has entered the room ' + data)
+        emit('return message', 'has left the room ' + previousChannel)
+
+    join_room(data['currentChannel'])
+    previousChannel = currentChannel
+    emit('return join channel', currentChannel)
+    emit('return message', 'has entered the room ' + currentChannel)
 
 # For sending messages
 @socketio.on("receive message")

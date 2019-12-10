@@ -2,8 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
+    // If no channel is stored locally, create one
+    if (!localStorage.getItem('channel'))
+        localStorage.setItem('channel', 'General')
+
     // Variable for storing current channel
-    let currentChannel = 'General';
+    var currentChannel = localStorage.getItem('channel');
 
     // Prevents Enter key to submit all form inputs
     let formList = document.querySelectorAll('.inputForm');
@@ -16,12 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // When connected
     socket.on('connect', () => {
 
-        console.log('connected');
+        console.log(currentChannel);
         // List channels
         socket.emit('available channels');
 
         // Join channel General
-        socket.emit('join channel', currentChannel);
+        //socket.emit('join channel', {'currentChannel': currentChannel});
 
     })
 
@@ -41,18 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('chatInput').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
             const messageField = document.getElementById('chatInput');
-            socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel});
-            messageField.value = '';
+            if (messageField.value.length > 0) {
+                console.log('Currently in ' + currentChannel);
+                socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel});
+                messageField.value = '';
+            }
         }
     })
 
     // Display sent messages in page
     socket.on('return message', message => {
-        console.log('received a message');
-        const li = document.createElement('li');
-        li.innerHTML = message;
-        li.classList.add('list-group-item');
-        document.getElementById('messagesList').append(li);
+        const p = document.createElement('p');
+        user = localStorage.getItem('username');
+        p.innerHTML = '<strong>' + '@' + user + '</strong>' + ' ' + message;
+        document.getElementById('messagesList').append(p);
     })
 
     // Display messages from messagesArchive
@@ -94,12 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#channelList').append(a);
         })
 
+    socket.on('return join channel', data => {
+        currentChannel = localStorage.setItem('channel', data);
+    })
+
         // Listens for clicks in each link in channel list and joins channel
         document.querySelectorAll('.channel-change').forEach( (link) => {
             link.onclick = () => {
                 selectedChannel = link.getAttribute('data-channel');
-                socket.emit('join channel', selectedChannel);
-                currentChannel = selectedChannel;
+                socket.emit('join channel', {'currentChannel': selectedChannel});
+                currentChannel = localStorage.setItem('channel', selectedChannel);
             }
         })
     })
