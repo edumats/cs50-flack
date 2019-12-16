@@ -2,6 +2,8 @@ import os
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit, join_room, leave_room
+import collections
+from collections import deque
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -10,7 +12,10 @@ previousChannel = None
 
 # Array with channel names
 channelList = ["General", "Instagram", "Naniwa"]
-messagesArchive = []
+messagesArchive = {
+    "General": deque([], maxlen=100)
+}
+totalUsers = []
 
 @app.route("/")
 def index():
@@ -24,7 +29,7 @@ def availableChannel():
 # For adding a new channel to List
 @socketio.on("submit channel")
 def channel(data):
-    channel = data["channelName"]
+    channel = data.get('channelName')
     if channel in channelList:
         return jsonify({"success": False})
     channelList.append(channel)
@@ -34,22 +39,29 @@ def channel(data):
 @socketio.on("join channel")
 def joinChannel(data):
     global previousChannel
-    currentChannel = data['currentChannel']
+    currentChannel = data.get('currentChannel')
     if previousChannel != None:
         leave_room(previousChannel)
-        emit('return message', 'has left the room ' + previousChannel)
+        emit('return message', {'messageField': 'has left the room ' + previousChannel})
 
-    join_room(data['currentChannel'])
-    previousChannel = currentChannel
-    emit('return join channel', currentChannel)
-    emit('return message', 'has entered the room ' + currentChannel)
+    if previousChannel != currentChannel:
+        join_room(data['currentChannel'])
+        previousChannel = currentChannel
+        emit('return join channel', currentChannel)
+        emit('return message', {'messageField': 'has joined the room ' + currentChannel})
 
-# For sending messages
+
+# For receiving messages from clients
 @socketio.on("receive message")
 def message(data):
-    messagesArchive.append(data['messageField']);
-    print(data['currentChannel'])
-    emit("return message", data['messageField'], room=data['currentChannel'])
+    print('message received in server')
+    room = data.get('currentChannel')
+    message = data.get('messageField')
+    time = data.get('currentTime')
+    messagesArchive[room].append([message, room, time]);
+    print(messagesArchive)
+    emit("return message", {'messageField': message, 'currentChannel': room, 'currentTime': time})
+    print('server sent message to user in room ' + data['currentChannel'])
 
 @socketio.on("previous messages")
 def previousMessages():

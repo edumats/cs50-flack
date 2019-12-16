@@ -2,30 +2,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-    // If no channel is stored locally, create one
-    if (!localStorage.getItem('channel'))
-        localStorage.setItem('channel', 'General')
-
-    // Variable for storing current channel
-    var currentChannel = localStorage.getItem('channel');
-
     // Prevents Enter key to submit all form inputs
-    let formList = document.querySelectorAll('.inputForm');
+    const formList = document.querySelectorAll('.inputForm');
     formList.forEach(form => {
         form.addEventListener('submit', e => {
             e.preventDefault();
         });
     })
 
-    // When connected
+    // When connected, do:
     socket.on('connect', () => {
-        console.log('Connected on ' + currentChannel);
+
+        // Logs in
+        login();
+
         // List channels
         socket.emit('available channels');
 
-        // Join current channel
-        socket.emit('join channel', {'currentChannel': currentChannel});
+        // If no channel is stored locally, create one
+        if (!localStorage.getItem('channel'))
+            localStorage.setItem('channel', 'General')
 
+        const currentChannel = localStorage.getItem('channel');
+        let currentTime = new Date();
+        // Join current channel and sends current date/time
+        socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime});
     })
 
     // For messaging
@@ -35,20 +36,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listens for clicks and submits message to server
     document.getElementById('sendButton').onclick = () => {
-        currentChannel = localStorage.getItem('channel');
+        const currentChannel = localStorage.getItem('channel');
         const messageField = document.getElementById('chatInput');
-        console.log('Currently in ' + currentChannel);
-        socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel});
+        let currentTime = new Date();
+        console.log(currentTime);
+        // Sends to server message, channel and time data
+        socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel, 'currentTime': currentTime});
+        console.log('Sent message in room ' + currentChannel);
         messageField.value = '';
     }
 
     // Sends message through Enter key
     document.getElementById('chatInput').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
-            currentChannel = localStorage.getItem('channel');
+            const currentChannel = localStorage.getItem('channel');
             const messageField = document.getElementById('chatInput');
             if (messageField.value.length > 0) {
-                console.log('Currently in ' + currentChannel);
+                console.log('Sent message in room ' + currentChannel);
                 socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel});
                 messageField.value = '';
             }
@@ -56,17 +60,19 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     // Display sent messages in page
-    socket.on('return message', message => {
-        console.log('Receiving message ' + currentChannel);
+    socket.on('return message', data => {
+        const currentChannel = localStorage.getItem('channel');
+        console.log('Receiving message in room ' + currentChannel);
         const p = document.createElement('p');
         user = localStorage.getItem('username');
-        p.innerHTML = '<strong>' + '@' + user + '</strong>' + ' ' + message;
+        p.innerHTML = '<strong>' + '@' + user + '</strong>' + ' ' + '@' + data['currentTime'] + ' ' + data['messageField']
         document.getElementById('messagesList').append(p);
     })
 
     // Display messages from messagesArchive
     socket.on('receive previous messages', data => {
         data.forEach(message => {
+            console.log('receiving message from server');
             const li = document.createElement('li');
             li.innerHTML = message;
             li.classList.add('list-group-item');
@@ -102,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             a.innerHTML = item;
             document.querySelector('#channelList').append(a);
         })
+    })
 
     socket.on('return join channel', data => {
 
@@ -110,16 +117,16 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
         // Listens for clicks in each link in channel list and joins channel
-        document.querySelectorAll('.channel-change').forEach( (link) => {
-            link.onclick = () => {
-                selectedChannel = link.getAttribute('data-channel');
-                socket.emit('join channel', {'currentChannel': selectedChannel});
-                localStorage.setItem('channel', selectedChannel);
-            }
-        })
+    document.querySelectorAll('.channel-change').forEach( (link) => {
+        link.onclick = () => {
+            console.log('Clicked on link');
+            const currentChannel = localStorage.getItem('channel');
+            const selectedChannel = link.getAttribute('data-channel');
+            socket.emit('join channel', {'currentChannel': selectedChannel});
+            console.log("Channel sent to server");
+            localStorage.setItem('channel', selectedChannel);
+        }
     })
-
-
 
     // Listens for clicks on add channel button
     document.getElementById('addChannelButton').addEventListener('click', () => {
@@ -127,26 +134,39 @@ document.addEventListener('DOMContentLoaded', () => {
         validInput('#submitChannel','#channelName');
     })
 
-    // Listens for clicks on button
+    // Listens for clicks on login button
     document.getElementById('addDisplayName').onclick = login;
-});
+
+    // Listens for clicks on logout button
+    document.getElementById('logoutLink').onclick = logout;
+})
+
 
 // For activating login modal
 function login() {
-    // Shows pop-up dialog for prompting display name
-    $('#myModal').modal();
+    // Get user name
+    let userExists = localStorage.getItem('username');
+    if (!userExists) {
+        // Shows pop-up dialog for prompting display name
+        $('#myModal').modal();
 
-    validInput('#submitName','#displayName');
+        // Do no let empty inputs being posted
+        validInput('#submitName','#displayName');
 
-    // When form is submitted, creates request
-    document.querySelector('#loginForm').onsubmit = () => {
-        const username = document.querySelector('#displayName').value;
-        const savedUser = localStorage.getItem('username');
-
-        if (!savedUser) {
-            localStorage.setItem('username', username);
+        // When form is submitted, creates request
+        document.querySelector('#submitName').onclick = () => {
+            const username = document.querySelector('#displayName');
+            localStorage.setItem('username', username.value);
+            username.value = "";
+            $('#myModal').modal('hide');
         }
-    };
+    }
+}
+
+// Deletes username data in local storage
+function logout() {
+    console.log('Deleting user  data');
+    localStorage.clear();
 }
 
 // Prevents empty inputs being sent in prompts.
@@ -163,5 +183,5 @@ function validInput(button, input) {
             document.querySelector(button).disabled = true;
         }
 
-    };
+    }
 }
