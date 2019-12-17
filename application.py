@@ -8,14 +8,14 @@ from collections import deque
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
-previousChannel = None
+currentChannel = deque([], maxlen=1)
 
 # Array with channel names
 channelList = ["General", "Instagram", "Naniwa"]
 messagesArchive = {
     "General": deque([], maxlen=100)
 }
-totalUsers = []
+
 
 @app.route("/")
 def index():
@@ -38,17 +38,21 @@ def channel(data):
 # For joining a channel
 @socketio.on("join channel")
 def joinChannel(data):
-    global previousChannel
-    currentChannel = data.get('currentChannel')
-    if previousChannel != None:
-        leave_room(previousChannel)
-        emit('return message', {'messageField': 'has left the room ' + previousChannel})
+    global currentChannel
+    print(currentChannel)
+    channel = data.get('currentChannel')
+    currentChannel.append(channel)
+    join_room(channel)
+    emit('return message', {'messageField': 'has joined the room ' + channel})
+    #if previousChannel != None:
+        #leave_room(previousChannel)
+        #emit('return message', {'messageField': 'has left the room ' + previousChannel})
 
-    if previousChannel != currentChannel:
-        join_room(data['currentChannel'])
-        previousChannel = currentChannel
-        emit('return join channel', currentChannel)
-        emit('return message', {'messageField': 'has joined the room ' + currentChannel})
+    #if previousChannel != currentChannel:
+        #join_room(data['currentChannel'])
+        #previousChannel = currentChannel
+        #emit('return join channel', currentChannel)
+        #emit('return message', {'messageField': 'has joined the room ' + currentChannel})
 
 
 # For receiving messages from clients

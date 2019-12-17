@@ -36,25 +36,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listens for clicks and submits message to server
     document.getElementById('sendButton').onclick = () => {
-        const currentChannel = localStorage.getItem('channel');
-        const messageField = document.getElementById('chatInput');
-        let currentTime = new Date();
-        console.log(currentTime);
-        // Sends to server message, channel and time data
-        socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel, 'currentTime': currentTime});
-        console.log('Sent message in room ' + currentChannel);
-        messageField.value = '';
+        const channel = localStorage.getItem('channel');
+        const message = document.getElementById('chatInput');
+        sendMessage(message, channel);
     }
 
     // Sends message through Enter key
     document.getElementById('chatInput').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
-            const currentChannel = localStorage.getItem('channel');
-            const messageField = document.getElementById('chatInput');
+            const channel = localStorage.getItem('channel');
+            const message = document.getElementById('chatInput');
             if (messageField.value.length > 0) {
-                console.log('Sent message in room ' + currentChannel);
-                socket.emit('receive message', {'messageField': messageField.value, 'currentChannel': currentChannel});
-                messageField.value = '';
+                sendMessage(message, channel)
             }
         }
     })
@@ -139,49 +132,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listens for clicks on logout button
     document.getElementById('logoutLink').onclick = logout;
+
+    // Sends to server message, channel and time data
+    function sendMessage(message, channel) {
+        let time = new Date();
+        socket.emit('receive message', {'messageField': message.value, 'currentChannel': channel, 'currentTime': time});
+        console.log('Sent message in room ' + channel);
+        message.value = '';
+    }
+
+    // For activating login modal
+    function login() {
+        // Get user name
+        let userExists = localStorage.getItem('username');
+        if (!userExists) {
+            // Shows pop-up dialog for prompting display name
+            $('#myModal').modal();
+
+            // Do no let empty inputs being posted
+            validInput('#submitName','#displayName');
+
+            // When form is submitted, creates request
+            document.querySelector('#submitName').onclick = () => {
+                const username = document.querySelector('#displayName');
+                localStorage.setItem('username', username.value);
+                username.value = "";
+                $('#myModal').modal('hide');
+            }
+        }
+    }
+
+    // Deletes username data in local storage
+    function logout() {
+        console.log('Deleting user  data');
+        localStorage.clear();
+    }
+
+    // Prevents empty inputs being sent in prompts.
+    // Input = response from user, button = element that triggers submission
+    function validInput(button, input) {
+        // Disables submit button by default
+        document.querySelector(button).disabled = true;
+
+        // Enables submit button only if user typed something on display name input field
+        document.querySelector(input).onkeyup = () => {
+            if (document.querySelector(input).value.length > 0) {
+                document.querySelector(button).disabled = false;
+            } else {
+                document.querySelector(button).disabled = true;
+            }
+
+        }
+    }
 })
-
-
-// For activating login modal
-function login() {
-    // Get user name
-    let userExists = localStorage.getItem('username');
-    if (!userExists) {
-        // Shows pop-up dialog for prompting display name
-        $('#myModal').modal();
-
-        // Do no let empty inputs being posted
-        validInput('#submitName','#displayName');
-
-        // When form is submitted, creates request
-        document.querySelector('#submitName').onclick = () => {
-            const username = document.querySelector('#displayName');
-            localStorage.setItem('username', username.value);
-            username.value = "";
-            $('#myModal').modal('hide');
-        }
-    }
-}
-
-// Deletes username data in local storage
-function logout() {
-    console.log('Deleting user  data');
-    localStorage.clear();
-}
-
-// Prevents empty inputs being sent in prompts.
-// Input = response from user, button = element that triggers submission
-function validInput(button, input) {
-    // Disables submit button by default
-    document.querySelector(button).disabled = true;
-
-    // Enables submit button only if user typed something on display name input field
-    document.querySelector(input).onkeyup = () => {
-        if (document.querySelector(input).value.length > 0) {
-            document.querySelector(button).disabled = false;
-        } else {
-            document.querySelector(button).disabled = true;
-        }
-
-    }
-}
