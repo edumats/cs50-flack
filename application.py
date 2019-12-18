@@ -18,6 +18,11 @@ messagesArchive = {
 def index():
     return render_template("index.html")
 
+@socketio.on('log in')
+def login(data):
+    print("Log in server")
+    emit("log in", data.get('user'))
+
 # For returning current channels
 @socketio.on("available channels")
 def availableChannel():
@@ -43,27 +48,17 @@ def channel(data):
 @socketio.on("join channel")
 def joinChannel(data):
     currentChannel = data.get('currentChannel')
-    print(currentChannel)
     selectedChannel = data.get('selectedChannel')
     if selectedChannel == 'empty':
         print(selectedChannel)
+        print(currentChannel)
         join_room('currentChannel')
-        emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentTime': data.get('currentTime')}, room=currentChannel)
+        emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentTime': data.get('currentTime')})
     else:
         leave_room(currentChannel)
         emit('return message', {'messageField': 'has left the room ' + currentChannel}, room=currentChannel)
         join_room(selectedChannel)
-        emit('return message', {'messageField': 'has joined the room ' + selectedChannel, 'currentTime': data.get('currentTime')}, room=selectedChannel)
-    #if previousChannel != None:
-        #leave_room(previousChannel)
-        #emit('return message', {'messageField': 'has left the room ' + previousChannel})
-
-    #if previousChannel != currentChannel:
-        #join_room(data['currentChannel'])
-        #previousChannel = currentChannel
-        #emit('return join channel', currentChannel)
-        #emit('return message', {'messageField': 'has joined the room ' + currentChannel})
-
+        emit('return message', {'messageField': 'has joined the room ' + selectedChannel, 'currentTime': data.get('currentTime')})
 
 # For receiving messages from clients
 @socketio.on("receive message")
@@ -75,12 +70,13 @@ def message(data):
     user = data.get('user')
     messagesArchive[room].append([message, room, time, user]);
     print(messagesArchive)
-    emit("return message", {'messageField': message, 'currentChannel': room, 'currentTime': time, 'user': user}, room=room)
-    print('server sent message to user in room ' + data['currentChannel'])
+    emit("return message", {'messageField': message, 'currentChannel': room, 'currentTime': time, 'user': user}, broadcast = True)
+    print('server sent message to user in room ' + room)
 
 @socketio.on("previous messages")
-def previousMessages():
-    if message in messagesArchive:
+def previousMessages(data):
+    channel = data.get('currentChannel')
+    if message in messagesArchive[channel]:
         emit("receive previous messages", messagesArchive)
 
 # Must add line below because of SocketIO bug: https://github.com/miguelgrinberg/Flask-SocketIO/issues/817

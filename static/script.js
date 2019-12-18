@@ -21,14 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // If no channel is stored locally, create one
         if (!localStorage.getItem('channel'))
             localStorage.setItem('channel', 'General')
-
-        const currentChannel = localStorage.getItem('channel');
-        let currentTime = new Date();
-        // Join current channel and sends current date/time
-        socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty'});
     })
 
-    // For messaging
+    socket.on('log in', (data) => {
+        // Join current channel and sends current date/time
+        console.log('Logging in');
+        const currentChannel = localStorage.getItem('channel');
+        const currentTime = new Date();
+        socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty'});
+    })
+    /*
+
+
+    For messaging related
+
+
+    */
 
     // Prevents sending empty messages
     validInput('#sendButton','#chatInput');
@@ -54,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display sent messages in page
     socket.on('return message', data => {
         // currentChannel not being used
+        console.log('receiving message from server');
         const currentChannel = data['currentChannel'];
         console.log('Receiving message in room ' + currentChannel);
 
@@ -95,16 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
             a.setAttribute('data-channel', item);
             a.innerHTML = item;
             document.querySelector('#channelList').append(a);
-            console.log('Created channel list');
             // Listens for clicks in each channel in channel list and sends a join signal to server if clicked
             document.querySelectorAll('.singleChannel').forEach((channel) => {
                 channel.onclick = () => {
-                    console.log('Clicked on link');
                     let currentTime = new Date();
                     const selectedChannel = channel.getAttribute('data-channel');
                     const currentChannel = localStorage.getItem('channel');
                     socket.emit('join channel', {'selectedChannel': selectedChannel, 'currentTime': currentTime, 'currentChannel': currentChannel});
-                    console.log("Channel sent to server");
                     localStorage.setItem('channel', selectedChannel);
                 }
             })
@@ -168,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const username = document.querySelector('#displayName');
                 localStorage.setItem('username', username.value);
                 username.value = "";
+                socket.emit('log in', {'user': username});
                 $('#userModal').modal('hide');
             }
 
@@ -177,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const username = document.querySelector('#displayName');
                         localStorage.setItem('username', username.value);
                         username.value = "";
+                        socket.emit('log in', {'user': username});
                         $('#userModal').modal('hide');
                     }
                 }
