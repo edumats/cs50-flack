@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // When connected, do:
     socket.on('connect', () => {
-
         // Logs in
         login();
 
@@ -26,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentChannel = localStorage.getItem('channel');
         let currentTime = new Date();
         // Join current channel and sends current date/time
-        socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime});
+        socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty'});
     })
 
     // For messaging
@@ -41,12 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         sendMessage(message, channel);
     }
 
-    // Sends message through Enter key
+    // Sends message through Enter key if not empty
     document.getElementById('chatInput').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
             const channel = localStorage.getItem('channel');
             const message = document.getElementById('chatInput');
-            if (messageField.value.length > 0) {
+            if (message.value.length > 0) {
                 sendMessage(message, channel)
             }
         }
@@ -54,11 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display sent messages in page
     socket.on('return message', data => {
-        const currentChannel = localStorage.getItem('channel');
+        // currentChannel not being used
+        const currentChannel = data['currentChannel'];
         console.log('Receiving message in room ' + currentChannel);
+
+        const user = data['user'];
+        const message = data['messageField'];
+        const time = data['currentTime'];
         const p = document.createElement('p');
-        user = localStorage.getItem('username');
-        p.innerHTML = '<strong>' + '@' + user + '</strong>' + ' ' + '@' + data['currentTime'] + ' ' + data['messageField']
+        p.innerHTML = '<strong>' + user + '</strong>' + ' ' + '@' + time + ' ' + message;
         document.getElementById('messagesList').append(p);
     })
 
@@ -68,19 +71,62 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('receiving message from server');
             const li = document.createElement('li');
             li.innerHTML = message;
-            li.classList.add('list-group-item');
+            li.classList.add('list-group-item', 'message-item');
             document.getElementById('messagesList').append(li);
         })
     })
 
-    // For channel
+    /*
+
+
+    For channel related
+
+
+
+    */
+
+    // Receiving channel as list and displaying on page
+    socket.on('receive channels', data => {
+        document.querySelector('#channelList').innerHTML = '';
+        // Gets array of channels and create html for each one
+        data.forEach(item => {
+            const a = document.createElement('a');
+            a.classList.add('singleChannel', 'list-group-item', 'list-group-item-action');
+            a.setAttribute('data-channel', item);
+            a.innerHTML = item;
+            document.querySelector('#channelList').append(a);
+            console.log('Created channel list');
+            // Listens for clicks in each channel in channel list and sends a join signal to server if clicked
+            document.querySelectorAll('.singleChannel').forEach((channel) => {
+                channel.onclick = () => {
+                    console.log('Clicked on link');
+                    let currentTime = new Date();
+                    const selectedChannel = channel.getAttribute('data-channel');
+                    const currentChannel = localStorage.getItem('channel');
+                    socket.emit('join channel', {'selectedChannel': selectedChannel, 'currentTime': currentTime, 'currentChannel': currentChannel});
+                    console.log("Channel sent to server");
+                    localStorage.setItem('channel', selectedChannel);
+                }
+            })
+        })
+    })
 
     // Listens for channel name submissions
     document.getElementById('submitChannel').onclick = () => {
-        const channelName = document.getElementById('channelName').value;
-        socket.emit('submit channel', {'channelName': channelName});
+        const channelName = document.getElementById('channelName');
+        socket.emit('submit channel', {'channelName': channelName.value});
         channelName.value = '';
     }
+
+    document.getElementById('channelName').addEventListener('keyup', e => {
+        if (e.keyCode === 13) {
+            const channelName = document.getElementById('channelName');
+            if (channelName.value.length > 0) {
+                socket.emit('submit channel', {'channelName': channelName.value});
+                channelName.value = '';
+            }
+        }
+    })
 
     // Prevents default behavior of Enter key and sends input to server
     document.getElementById('channelForm').addEventListener('submit', e => {
@@ -89,42 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('submit channel', {'channelName': channelName});
         document.getElementById('channelName').value = '';
         $('#addChannelModal').modal('hide');
-    })
-
-    // Displays channel List on page
-    socket.on('receive channels', data => {
-        document.querySelector('#channelList').innerHTML = '';
-        data.forEach(item => {
-            const a = document.createElement('a');
-            a.classList.add('list-group-item', 'list-group-item-action', 'channel-change');
-            a.setAttribute('data-channel', item);
-            a.innerHTML = item;
-            document.querySelector('#channelList').append(a);
-        })
-    })
-
-    socket.on('return join channel', data => {
-
-        localStorage.setItem('channel', data);
-        console.log('Returning channel ' + data);
-    })
-
-        // Listens for clicks in each link in channel list and joins channel
-    document.querySelectorAll('.channel-change').forEach( (link) => {
-        link.onclick = () => {
-            console.log('Clicked on link');
-            const currentChannel = localStorage.getItem('channel');
-            const selectedChannel = link.getAttribute('data-channel');
-            socket.emit('join channel', {'currentChannel': selectedChannel});
-            console.log("Channel sent to server");
-            localStorage.setItem('channel', selectedChannel);
-        }
-    })
-
-    // Listens for clicks on add channel button
-    document.getElementById('addChannelButton').addEventListener('click', () => {
-        $('#addChannelModal').modal();
-        validInput('#submitChannel','#channelName');
     })
 
     // Listens for clicks on login button
@@ -136,7 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sends to server message, channel and time data
     function sendMessage(message, channel) {
         let time = new Date();
-        socket.emit('receive message', {'messageField': message.value, 'currentChannel': channel, 'currentTime': time});
+        let user = localStorage.getItem('username');
+        socket.emit('receive message', {'messageField': message.value, 'currentChannel': channel, 'currentTime': time, 'user': user});
         console.log('Sent message in room ' + channel);
         message.value = '';
     }
@@ -147,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let userExists = localStorage.getItem('username');
         if (!userExists) {
             // Shows pop-up dialog for prompting display name
-            $('#myModal').modal();
+            $('#userModal').modal();
 
             // Do no let empty inputs being posted
             validInput('#submitName','#displayName');
@@ -157,8 +168,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const username = document.querySelector('#displayName');
                 localStorage.setItem('username', username.value);
                 username.value = "";
-                $('#myModal').modal('hide');
+                $('#userModal').modal('hide');
             }
+
+            document.querySelector('#displayName').addEventListener('keyup', e => {
+                if (e.keyCode === 13) {
+                    if (displayName.value.length > 0) {
+                        const username = document.querySelector('#displayName');
+                        localStorage.setItem('username', username.value);
+                        username.value = "";
+                        $('#userModal').modal('hide');
+                    }
+                }
+            })
         }
     }
 

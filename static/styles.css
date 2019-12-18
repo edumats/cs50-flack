@@ -2,3 +2,7 @@
     height: 90vh;
     overflow: scroll;
 }
+
+.input-group {
+    width: 100%;
+}

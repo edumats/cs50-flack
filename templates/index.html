@@ -49,14 +49,23 @@
         <div class="container-fluid">
             <div class="row">
                 <!-- Left Side bar -->
-                <nav class="col-md-2 bg-light sidebar">
+                <nav class="col-md-3 bg-light sidebar">
                     <h2>Channels</h2>
                     <div id="channelList" class="list-group">
+                        <li class="testing">
+                        </li>
+                        <li class="testing">
+                        </li>
                     </div>
-                    <button id="addChannelButton">Add Channel</button>
+                    <div class="input-group">
+                        <input id="channelName" autocomplete="off" placeholder="Add channel" autofocus/>
+                        <div class="input-group-append">
+                            <button id="submitChannel" type="button" class="btn btn-primary">Add</button>
+                        </div>
+                    </div>
                 </nav>
                 <!-- Chat contents -->
-                <main class="col-md-10">
+                <main class="col-md-9">
                     <div id="messagesList" class="list-group"></div>
                     <div class="input-group">
                         <input id="chatInput" autocomplete="off" autofocus/>
@@ -69,7 +78,7 @@
         </div>
 
         <!-- Pop up display for prompting display name to user -->
-        <div class="modal" id="myModal" tabindex="-1" role="dialog">
+        <div class="modal" id="userModal" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
