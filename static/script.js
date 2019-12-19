@@ -183,6 +183,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             })
+        } else {
+            console.log('Already logged')
+            logUserData();
         }
     }
 

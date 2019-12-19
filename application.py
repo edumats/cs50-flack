@@ -46,13 +46,15 @@ def joinChannel(data):
     selectedChannel = data.get('selectedChannel')
     if selectedChannel == 'empty':
         print('joining a channel for the first time')
-        join_room('currentChannel')
+        join_room(currentChannel)
         emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
     else:
         print('switching channels')
         leave_room(currentChannel)
         emit('return message', {'messageField': 'has left the room ' + currentChannel, 'currentChannel':currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
         join_room(selectedChannel)
+        if len(messagesArchive[selectedChannel]) == 0:
+            print('messages are here')
         emit('return message', {'messageField': 'has joined the room ' + selectedChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=selectedChannel)
 
 # For receiving messages from clients
@@ -73,6 +75,8 @@ def previousMessages(data):
     channel = data.get('currentChannel')
     if message in messagesArchive[channel]:
         emit("receive previous messages", messagesArchive)
+
+
 
 # Must add line below because of SocketIO bug: https://github.com/miguelgrinberg/Flask-SocketIO/issues/817
 # Instead of "flask run", application is run using "python3 application.py"
