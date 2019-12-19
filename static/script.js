@@ -14,13 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('connect', () => {
         // Logs in
         login();
-
-        // List channels
-        socket.emit('available channels');
-
-        // If no channel is stored locally, create one
-        if (!localStorage.getItem('channel'))
-            localStorage.setItem('channel', 'General')
     })
 
     /*
@@ -71,10 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('receive previous messages', data => {
         data.forEach(message => {
             console.log('receiving previous messages from server');
-            const li = document.createElement('li');
-            li.innerHTML = message;
-            li.classList.add('list-group-item', 'message-item');
-            document.getElementById('messagesList').append(li);
+            document.querySelector('#messagesList').innerHTML = "";
+            const p = document.createElement('p');
+            p.innerHTML = '<strong>' + message[3] + '</strong>' + ' ' + '@' + message[2] + ' ' + message[0];
+            console.log(p);
+            document.getElementById('messagesList').append(p);
         })
     })
 
@@ -111,13 +105,16 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
-    // Listens for channel name submissions
+    // Do no let empty inputs being posted
+    validInput('#submitChannel', '#channelName');
+    // Listens for channel name submissions on click
     document.getElementById('submitChannel').onclick = () => {
         const channelName = document.getElementById('channelName');
         socket.emit('submit channel', {'channelName': channelName.value});
         channelName.value = '';
     }
 
+    // Listens for channel name submissions on enter key
     document.getElementById('channelName').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
             const channelName = document.getElementById('channelName');
@@ -126,15 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 channelName.value = '';
             }
         }
-    })
-
-    // Prevents default behavior of Enter key and sends input to server
-    document.getElementById('channelForm').addEventListener('submit', e => {
-        e.preventDefault();
-        const channelName = document.getElementById('channelName').value;
-        socket.emit('submit channel', {'channelName': channelName});
-        document.getElementById('channelName').value = '';
-        $('#addChannelModal').modal('hide');
     })
 
     // Listens for clicks on login button
@@ -154,6 +142,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // For activating login modal
     function login() {
+        // If no channel is stored locally, create one
+        if (!localStorage.getItem('channel'))
+            localStorage.setItem('channel', 'General')
+
+        // List channels
+        socket.emit('available channels');
+
         // Get user name
         let userExists = localStorage.getItem('username');
         if (!userExists) {
@@ -201,6 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function logout() {
         console.log('Deleting user  data');
         localStorage.clear();
+        document.querySelector('#channelList').innerHTML = "";
+        document.querySelector('#messagesList').innerHTML = "";
+        login();
     }
 
     // Prevents empty inputs being sent in prompts.

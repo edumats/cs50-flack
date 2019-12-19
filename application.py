@@ -53,8 +53,11 @@ def joinChannel(data):
         leave_room(currentChannel)
         emit('return message', {'messageField': 'has left the room ' + currentChannel, 'currentChannel':currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
         join_room(selectedChannel)
-        if len(messagesArchive[selectedChannel]) == 0:
+        if messagesArchive[selectedChannel]:
             print('messages are here')
+            print(list(messagesArchive[selectedChannel]))
+            messages = list(messagesArchive[selectedChannel])
+            emit('receive previous messages', messages)
         emit('return message', {'messageField': 'has joined the room ' + selectedChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=selectedChannel)
 
 # For receiving messages from clients
