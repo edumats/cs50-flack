@@ -23,13 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('channel', 'General')
     })
 
-    socket.on('log in', (data) => {
-        // Join current channel and sends current date/time
-        console.log('Logging in');
-        const currentChannel = localStorage.getItem('channel');
-        const currentTime = new Date();
-        socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty'});
-    })
     /*
 
 
@@ -77,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display messages from messagesArchive
     socket.on('receive previous messages', data => {
         data.forEach(message => {
-            console.log('receiving message from server');
+            console.log('receiving previous messages from server');
             const li = document.createElement('li');
             li.innerHTML = message;
             li.classList.add('list-group-item', 'message-item');
@@ -110,7 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     let currentTime = new Date();
                     const selectedChannel = channel.getAttribute('data-channel');
                     const currentChannel = localStorage.getItem('channel');
-                    socket.emit('join channel', {'selectedChannel': selectedChannel, 'currentTime': currentTime, 'currentChannel': currentChannel});
+                    const user = localStorage.getItem('username');
+                    socket.emit('join channel', {'selectedChannel': selectedChannel, 'currentTime': currentTime, 'currentChannel': currentChannel, 'user': user});
                     localStorage.setItem('channel', selectedChannel);
                 }
             })
@@ -174,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const username = document.querySelector('#displayName');
                 localStorage.setItem('username', username.value);
                 username.value = "";
-                socket.emit('log in', {'user': username});
+                logUserData();
                 $('#userModal').modal('hide');
             }
 
@@ -184,12 +178,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         const username = document.querySelector('#displayName');
                         localStorage.setItem('username', username.value);
                         username.value = "";
-                        socket.emit('log in', {'user': username});
+                        logUserData();
                         $('#userModal').modal('hide');
                     }
                 }
             })
         }
+    }
+
+    function logUserData() {
+        console.log('Logging in');
+        const currentChannel = localStorage.getItem('channel');
+        const currentTime = new Date();
+        const user = localStorage.getItem('username');
+        socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty', 'user': user});
     }
 
     // Deletes username data in local storage
