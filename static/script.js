@@ -60,11 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('messagesList').append(p);
     })
 
-    // Display messages from messagesArchive
+    // Display previous messages in the room from messagesArchive
     socket.on('receive previous messages', data => {
+        document.querySelector('#messagesList').innerHTML = "";
         data.forEach(message => {
             console.log('receiving previous messages from server');
-            document.querySelector('#messagesList').innerHTML = "";
             const p = document.createElement('p');
             p.innerHTML = '<strong>' + message[3] + '</strong>' + ' ' + '@' + message[2] + ' ' + message[0];
             console.log(p);
@@ -94,10 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Listens for clicks in each channel in channel list and sends a join signal to server if clicked
             document.querySelectorAll('.singleChannel').forEach((channel) => {
                 channel.onclick = () => {
-                    let currentTime = new Date();
+                    let currentTime = new Date().toLocaleString();
                     const selectedChannel = channel.getAttribute('data-channel');
                     const currentChannel = localStorage.getItem('channel');
                     const user = localStorage.getItem('username');
+                    document.querySelector('#messagesList').innerHTML = '';
                     socket.emit('join channel', {'selectedChannel': selectedChannel, 'currentTime': currentTime, 'currentChannel': currentChannel, 'user': user});
                     localStorage.setItem('channel', selectedChannel);
                 }
@@ -125,15 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })
 
-    // Listens for clicks on login button
-    document.getElementById('addDisplayName').onclick = login;
-
     // Listens for clicks on logout button
     document.getElementById('logoutLink').onclick = logout;
 
     // Sends to server message, channel and time data
     function sendMessage(message, channel) {
-        let time = new Date();
+        let time = new Date().toLocaleString();
         let user = localStorage.getItem('username');
         socket.emit('receive message', {'messageField': message.value, 'currentChannel': channel, 'currentTime': time, 'user': user});
         console.log('Sent message in room ' + channel);
@@ -187,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function logUserData() {
         console.log('Logging in');
         const currentChannel = localStorage.getItem('channel');
-        const currentTime = new Date();
+        const currentTime = new Date().toLocaleString();
         const user = localStorage.getItem('username');
         socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty', 'user': user});
     }

@@ -47,12 +47,18 @@ def joinChannel(data):
     if selectedChannel == 'empty':
         print('joining a channel for the first time')
         join_room(currentChannel)
+        if messagesArchive[selectedChannel]:
+            print('messages are here')
+            print(list(messagesArchive[selectedChannel]))
+            messages = list(messagesArchive[selectedChannel])
+            emit('receive previous messages', messages)
         emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
     else:
         print('switching channels')
         leave_room(currentChannel)
         emit('return message', {'messageField': 'has left the room ' + currentChannel, 'currentChannel':currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
         join_room(selectedChannel)
+        # checks if selected deque is not empty
         if messagesArchive[selectedChannel]:
             print('messages are here')
             print(list(messagesArchive[selectedChannel]))
