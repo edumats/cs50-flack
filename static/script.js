@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // $('#alertSystem').hide();
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
@@ -14,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('connect', () => {
         // Logs in
         login();
+    })
+
+    // Activates alert on the page
+    socket.on('send alert', data => {
+        document.querySelector('#alertSystem').innerHTML = data['message'];
+        document.querySelector('#alertSystem').addClass('d-none');
     })
 
     /*
@@ -50,14 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // currentChannel not being used
         console.log('receiving message from server');
         const currentChannel = data['currentChannel'];
-        console.log('Receiving message in room ' + currentChannel);
-
         const user = data['user'];
         const message = data['messageField'];
         const time = data['currentTime'];
-        const p = document.createElement('p');
-        p.innerHTML = '<strong>' + user + '</strong>' + ' ' + '@' + time + ' ' + message;
-        document.getElementById('messagesList').append(p);
+        createMessage(user, message, time);
     })
 
     // Display previous messages in the room from messagesArchive
@@ -65,18 +68,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#messagesList').innerHTML = "";
         data.forEach(message => {
             console.log('receiving previous messages from server');
-            const p = document.createElement('p');
-            p.innerHTML = '<strong>' + message[3] + '</strong>' + ' ' + '@' + message[2] + ' ' + message[0];
-            console.log(p);
-            document.getElementById('messagesList').append(p);
+            createMessage(message[3], message[0], message[2]);
         })
     })
 
+    function createMessage(user, message, time) {
+        const div = document.createElement('div');
+        div.classList.add('container-chat');
+        const span = document.createElement('span');
+        span.classList.add('time-left');
+        span.append(time);
+        const p = document.createElement('p');
+        p.innerHTML = '<strong>' + user + '</strong>' + ' ' + message;
+        div.append(p);
+        div.append(span);
+        document.getElementById('messagesList').append(div);
+    }
+
     /*
-
-
     For channel related
-
+    
 
 
     */
@@ -151,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let userExists = localStorage.getItem('username');
         if (!userExists) {
             // Shows pop-up dialog for prompting display name
-            $('#userModal').modal();
+            $('#userModal').modal({backdrop: 'static', keyboard: false});
 
             // Do no let empty inputs being posted
             validInput('#submitName','#displayName');

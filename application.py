@@ -32,7 +32,7 @@ def channel(data):
     # Checks if submitted channel exists as a key in dict
     if channel in messagesArchive.keys():
         return jsonify({"success": False})
-    # Creates a new key and initializes with a deque with max length 100
+    # Creates a new key and initializes with a deque with max length 100, if key already exists, do nothing
     # Saw on https://docs.quantifiedcode.com/python-anti-patterns/correctness/not_using_setdefault_to_initialize_a_dictionary.html
     messagesArchive.setdefault(channel, deque([], maxlen=100))
     # Get keys from dict as a list
@@ -47,10 +47,10 @@ def joinChannel(data):
     if selectedChannel == 'empty':
         print('joining a channel for the first time')
         join_room(currentChannel)
-        if messagesArchive[selectedChannel]:
+        if messagesArchive[currentChannel]:
             print('messages are here')
-            print(list(messagesArchive[selectedChannel]))
-            messages = list(messagesArchive[selectedChannel])
+            print(list(messagesArchive[currentChannel]))
+            messages = list(messagesArchive[currentChannel])
             emit('receive previous messages', messages)
         emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
     else:
@@ -85,9 +85,7 @@ def previousMessages(data):
     if message in messagesArchive[channel]:
         emit("receive previous messages", messagesArchive)
 
-
-
 # Must add line below because of SocketIO bug: https://github.com/miguelgrinberg/Flask-SocketIO/issues/817
-# Instead of "flask run", application is run using "python3 application.py"
+# Instead of "flask run", application can be run using "python3 application.py"
 if __name__ == "__main__":
     socketio.run(app, debug=True)
