@@ -33,19 +33,20 @@
 
     <body>
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-md navbar-light bg-dark border">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark border">
             <a class="navbar-brand" href="/"><span class="text-white">Flack</span></a>
             <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav ml-auto mt-2">
+                    <li class="nav-link text-light" id="welcome"></li>
                     <li class="nav-item" id="logoutLink"><a class="nav-link">Logout</a></li>
                 </ul>
             </div>
         </nav>
 
-        <!-- Alerts -->
+        <!-- Alert -->
         <div class="alert alert-danger alert-dismissible fade show d-none" id="alertSystem" role="alert">
             Channel already exists
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -61,18 +62,18 @@
                     <h2>Channels</h2>
                     <div id="channelList" class="list-group">
                     </div>
-                    <div class="input-group">
-                        <input id="channelName" autocomplete="off" placeholder="Add channel" autofocus/>
+                    <div class="mt-2 input-group mw-100">
+                        <input id="channelName" class="form-control" autocomplete="off" placeholder="Add channel" autofocus/>
                         <div class="input-group-append">
                             <button id="submitChannel" type="button" class="btn btn-primary">Add</button>
                         </div>
                     </div>
                 </nav>
                 <!-- Chat contents -->
-                <main class="col-md-9">
+                <main class="col-md-9" id="mainContent">
                     <div id="messagesList" class="list-group"></div>
-                    <div class="input-group">
-                        <input id="chatInput" autocomplete="off" autofocus/>
+                    <div class="input-group mw-100 mt-2" id="messageInput">
+                        <input id="chatInput" class="form-control" autocomplete="off" autofocus/>
                         <div class="input-group-append">
                             <button id="sendButton" type="button" class="btn btn-primary">Send</button>
                         </div>

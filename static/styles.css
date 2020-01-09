@@ -1,12 +1,15 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 .container-fluid main {
     height: 90vh;
     overflow: scroll;
 }
 
-.input-group {
-    width: 100%;
-}
-
+/* Styles chat boxes */
 .container-chat {
   border: 2px solid #dedede;
   background-color: #f1f1f1;
@@ -18,4 +21,21 @@
 .time-left {
   float: left;
   color: #999;
+}
+
+/* Controls chat input  field*/
+#messageInput {
+    position: fixed;
+    bottom: 15px;
+    width: 71vw;
+}
+
+/* Controls chat display area*/
+#messagesList {
+    padding-bottom: 10vh;
+}
+
+/* Hides scroll x in messages area */
+#mainContent {
+    overflow-x: hidden;
 }

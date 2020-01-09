@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listens for clicks and submits message to server
     document.getElementById('sendButton').onclick = () => {
         const channel = localStorage.getItem('channel');
-        const message = document.getElementById('chatInput');
+        const message = document.getElementById('chatInput').value;
         sendMessage(message, channel);
     }
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('chatInput').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
             const channel = localStorage.getItem('channel');
-            const message = document.getElementById('chatInput');
+            const message = document.getElementById('chatInput').value;
             if (message.value.length > 0) {
                 sendMessage(message, channel)
             }
@@ -54,9 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display sent messages in page
     socket.on('return message', data => {
-        // currentChannel not being used
-        console.log('receiving message from server');
-        const currentChannel = data['currentChannel'];
         const user = data['user'];
         const message = data['messageField'];
         const time = data['currentTime'];
@@ -83,11 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
         div.append(p);
         div.append(span);
         document.getElementById('messagesList').append(div);
+        const messagesWindow = document.querySelector('#mainContent');
+        messagesWindow.scrollTop = messagesWindow.scrollHeight;
+        //Source: http://sourcetricks.com/2010/07/javascript-scroll-to-bottom-of-page.html
     }
 
     /*
     For channel related
-    
+
 
 
     */
@@ -102,20 +102,38 @@ document.addEventListener('DOMContentLoaded', () => {
             a.setAttribute('data-channel', item);
             a.innerHTML = item;
             document.querySelector('#channelList').append(a);
-            // Listens for clicks in each channel in channel list and sends a join signal to server if clicked
-            document.querySelectorAll('.singleChannel').forEach((channel) => {
-                channel.onclick = () => {
-                    let currentTime = new Date().toLocaleString();
-                    const selectedChannel = channel.getAttribute('data-channel');
-                    const currentChannel = localStorage.getItem('channel');
-                    const user = localStorage.getItem('username');
-                    document.querySelector('#messagesList').innerHTML = '';
-                    socket.emit('join channel', {'selectedChannel': selectedChannel, 'currentTime': currentTime, 'currentChannel': currentChannel, 'user': user});
-                    localStorage.setItem('channel', selectedChannel);
-                }
-            })
+        })
+
+        // Listens for clicks in each channel in channel list and sends a join signal to server if clicked
+        document.querySelectorAll('.singleChannel').forEach((channel) => {
+            if (channel.querySelector('active') == null) {
+                // Active channel does not exist
+                const storedChannel = localStorage.getItem('channel');
+                const currentChannel = document.querySelector(`[data-channel=${CSS.escape(storedChannel)}]`);
+                currentChannel.classList.add('active');
+            }
+
+            channel.onclick = () => {
+                // Removes previous channel with active class
+                const remove = document.querySelectorAll('.singleChannel');
+                remove.forEach(item => {
+                    item.classList.remove('active');
+                })
+                // Gets data attribute and selects corresponding element, adding class active to it
+                const selectedChannel = channel.getAttribute('data-channel');
+                const activeChannel = document.querySelector(`[data-channel=${CSS.escape(selectedChannel)}]`);
+                activeChannel.classList.add('active');
+                // Sends time and channel data to server to join room
+                let currentTime = new Date().toLocaleString();
+                const currentChannel = localStorage.getItem('channel');
+                const user = localStorage.getItem('username');
+                document.querySelector('#messagesList').innerHTML = '';
+                socket.emit('join channel', {'selectedChannel': selectedChannel, 'currentTime': currentTime, 'currentChannel': currentChannel, 'user': user});
+                localStorage.setItem('channel', selectedChannel);
+            }
         })
     })
+
 
     // Do no let empty inputs being posted
     validInput('#submitChannel', '#channelName');
@@ -144,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function sendMessage(message, channel) {
         let time = new Date().toLocaleString();
         let user = localStorage.getItem('username');
-        socket.emit('receive message', {'messageField': message.value, 'currentChannel': channel, 'currentTime': time, 'user': user});
+        socket.emit('receive message', {'messageField': message, 'currentChannel': channel, 'currentTime': time, 'user': user});
         console.log('Sent message in room ' + channel);
         message.value = '';
     }
@@ -198,13 +216,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentChannel = localStorage.getItem('channel');
         const currentTime = new Date().toLocaleString();
         const user = localStorage.getItem('username');
+        createUserNav(user);
         socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty', 'user': user});
+    }
+
+    // Displays username in navbar
+    function createUserNav(user) {
+        document.getElementById('welcome').append('Welcome, ' + user);
     }
 
     // Deletes username data in local storage
     function logout() {
+        // Sends log off message
+        const channel = localStorage.getItem('channel');
+        const message = "logged off"
+        sendMessage(message, channel);
         console.log('Deleting user  data');
         localStorage.clear();
+        document.getElementById('welcome').innerHTML = "";
         document.querySelector('#channelList').innerHTML = "";
         document.querySelector('#messagesList').innerHTML = "";
         login();

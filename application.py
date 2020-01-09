@@ -38,6 +38,8 @@ def channel(data):
     # Get keys from dict as a list
     channelList = list(messagesArchive)
     emit("receive channels", channelList, broadcast=True)
+    #emit("return message", channel)
+
 
 # For joining a channel
 @socketio.on("join channel")
@@ -56,7 +58,7 @@ def joinChannel(data):
     else:
         print('switching channels')
         leave_room(currentChannel)
-        emit('return message', {'messageField': 'has left the room ' + currentChannel, 'currentChannel':currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
+        emit('return message', {'messageField': 'has left the room ' + currentChannel, 'currentChannel': selectedChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
         join_room(selectedChannel)
         # checks if selected deque is not empty
         if messagesArchive[selectedChannel]:
@@ -64,7 +66,7 @@ def joinChannel(data):
             print(list(messagesArchive[selectedChannel]))
             messages = list(messagesArchive[selectedChannel])
             emit('receive previous messages', messages)
-        emit('return message', {'messageField': 'has joined the room ' + selectedChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=selectedChannel)
+        emit('return message', {'messageField': 'has joined the room ' + selectedChannel, 'currentChannel': selectedChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=selectedChannel)
 
 # For receiving messages from clients
 @socketio.on("receive message")
