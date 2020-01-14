@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import collections
 from collections import deque
@@ -18,6 +18,14 @@ messagesArchive = {
 def index():
     return render_template("index.html")
 
+@socketio.on("connect")
+def test_connect():
+    print(request.sid)
+
+@socketio.on("disconnect")
+def test_connect():
+    print("DISCONNECTED!")
+
 # For returning current channels
 @socketio.on("available channels")
 def availableChannel():
@@ -31,7 +39,10 @@ def channel(data):
     channel = data.get('channelName')
     # Checks if submitted channel exists as a key in dict
     if channel in messagesArchive.keys():
-        return jsonify({"success": False})
+        print('Channel exists')
+        print(request.sid)
+        emit('alert message', {'message': "Channel already exists"}, room=request.sid)
+        return False
     # Creates a new key and initializes with a deque with max length 100, if key already exists, do nothing
     # Saw on https://docs.quantifiedcode.com/python-anti-patterns/correctness/not_using_setdefault_to_initialize_a_dictionary.html
     messagesArchive.setdefault(channel, deque([], maxlen=100))
@@ -51,7 +62,6 @@ def joinChannel(data):
         join_room(currentChannel)
         if messagesArchive[currentChannel]:
             print('messages are here')
-            print(list(messagesArchive[currentChannel]))
             messages = list(messagesArchive[currentChannel])
             emit('receive previous messages', messages)
         emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)

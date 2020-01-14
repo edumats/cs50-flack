@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // $('#alertSystem').hide();
+    $('#alertSystem').hide();
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
@@ -15,12 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('connect', () => {
         // Logs in
         login();
-    })
-
-    // Activates alert on the page
-    socket.on('send alert', data => {
-        document.querySelector('#alertSystem').innerHTML = data['message'];
-        document.querySelector('#alertSystem').addClass('d-none');
     })
 
     /*
@@ -45,9 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('chatInput').addEventListener('keyup', e => {
         if (e.keyCode === 13) {
             const channel = localStorage.getItem('channel');
-            const message = document.getElementById('chatInput').value;
+            const message = document.getElementById('chatInput');
             if (message.value.length > 0) {
-                sendMessage(message, channel)
+                sendMessage(message.value, channel)
+                message.value = '';
             }
         }
     })
@@ -103,6 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
             a.innerHTML = item;
             document.querySelector('#channelList').append(a);
         })
+
+    socket.on('alert message', data => {
+        console.log('Alerting');
+        document.getElementById('alertMessage').textContent = data.message;
+        $('#alertSystem').fadeTo(1, 1).show();
+        setTimeout(function() {
+            $("#alertSystem").fadeTo(500, 0).slideUp(500, function(){
+                $(this).hide();
+            });
+        }, 3000);
+    })
 
         // Listens for clicks in each channel in channel list and sends a join signal to server if clicked
         document.querySelectorAll('.singleChannel').forEach((channel) => {
@@ -216,12 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentChannel = localStorage.getItem('channel');
         const currentTime = new Date().toLocaleString();
         const user = localStorage.getItem('username');
-        createUserNav(user);
+        const message = document.getElementById('welcome').textContent = "Welcome, " + user;
         socket.emit('join channel', {'currentChannel': currentChannel, 'currentTime': currentTime, 'selectedChannel': 'empty', 'user': user});
     }
 
     // Displays username in navbar
     function createUserNav(user) {
+        console.log('welcome message');
         document.getElementById('welcome').append('Welcome, ' + user);
     }
 
