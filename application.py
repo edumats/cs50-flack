@@ -39,8 +39,7 @@ def channel(data):
     channel = data.get('channelName')
     # Checks if submitted channel exists as a key in dict
     if channel in messagesArchive.keys():
-        print('Channel exists')
-        print(request.sid)
+        #Channel exists
         emit('alert message', {'message': "Channel already exists"}, room=request.sid)
         return False
     # Creates a new key and initializes with a deque with max length 100, if key already exists, do nothing
@@ -58,22 +57,19 @@ def joinChannel(data):
     currentChannel = data.get('currentChannel')
     selectedChannel = data.get('selectedChannel')
     if selectedChannel == 'empty':
-        print('joining a channel for the first time')
+        # joining a channel for the first time
         join_room(currentChannel)
         if messagesArchive[currentChannel]:
-            print('messages are here')
             messages = list(messagesArchive[currentChannel])
             emit('receive previous messages', messages)
         emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
     else:
-        print('switching channels')
+        # switching channels
         leave_room(currentChannel)
         emit('return message', {'messageField': 'has left the room ' + currentChannel, 'currentChannel': selectedChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
         join_room(selectedChannel)
         # checks if selected deque is not empty
         if messagesArchive[selectedChannel]:
-            print('messages are here')
-            print(list(messagesArchive[selectedChannel]))
             messages = list(messagesArchive[selectedChannel])
             emit('receive previous messages', messages)
         emit('return message', {'messageField': 'has joined the room ' + selectedChannel, 'currentChannel': selectedChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=selectedChannel)
@@ -81,15 +77,12 @@ def joinChannel(data):
 # For receiving messages from clients
 @socketio.on("receive message")
 def message(data):
-    print('message received in server')
     room = data.get('currentChannel')
     message = data.get('messageField')
     time = data.get('currentTime')
     user = data.get('user')
     messagesArchive[room].append([message, room, time, user]);
-    print(messagesArchive)
     emit("return message", {'messageField': message, 'currentChannel': room, 'currentTime': time, 'user': user}, room=room)
-    print('server sent message to user in room ' + room)
 
 @socketio.on("previous messages")
 def previousMessages(data):

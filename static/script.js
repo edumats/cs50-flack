@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('receive previous messages', data => {
         document.querySelector('#messagesList').innerHTML = "";
         data.forEach(message => {
-            console.log('receiving previous messages from server');
+            // receiving previous messages from server
             createMessage(message[3], message[0], message[2]);
         })
     })
@@ -100,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
 
     socket.on('alert message', data => {
-        console.log('Alerting');
         document.getElementById('alertMessage').textContent = data.message;
         $('#alertSystem').fadeTo(1, 1).show();
         setTimeout(function() {
@@ -169,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let time = new Date().toLocaleString();
         let user = localStorage.getItem('username');
         socket.emit('receive message', {'messageField': message, 'currentChannel': channel, 'currentTime': time, 'user': user});
-        console.log('Sent message in room ' + channel);
         message.value = '';
     }
 
@@ -212,13 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
         } else {
-            console.log('Already logged')
+            // Already logged
             logUserData();
         }
     }
 
     function logUserData() {
-        console.log('Logging in');
+        // Logging in
         const currentChannel = localStorage.getItem('channel');
         const currentTime = new Date().toLocaleString();
         const user = localStorage.getItem('username');
@@ -228,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Displays username in navbar
     function createUserNav(user) {
-        console.log('welcome message');
+        // Welcome message
         document.getElementById('welcome').append('Welcome, ' + user);
     }
 
@@ -238,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const channel = localStorage.getItem('channel');
         const message = "logged off"
         sendMessage(message, channel);
-        console.log('Deleting user  data');
+        // Deleting user  data
         localStorage.clear();
         document.getElementById('welcome').innerHTML = "";
         document.querySelector('#channelList').innerHTML = "";
