@@ -93,4 +93,4 @@ def previousMessages(data):
 # Must add line below because of SocketIO bug: https://github.com/miguelgrinberg/Flask-SocketIO/issues/817
 # Instead of "flask run", application can be run using "python3 application.py"
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app)
