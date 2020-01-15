@@ -17,7 +17,7 @@ Please run application.py by using `python3 application.py` instead of `flask ru
 
 ### Compatibility
 
-Please use a updated Firefox or Chrome browser for best results.
+Please use an updated Firefox or Chrome browser for best results.
 
 Microsoft Edge and Safari will not display the chat's messages due to incompatibility with `CSS.escape()`
 
