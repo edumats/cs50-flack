@@ -19,7 +19,7 @@ Please run application.py by using `python3 application.py` instead of `flask ru
 
 Please use a updated Firefox or Chrome browser for best results.
 
-Microsoft Edge and Safari won't display the chat's messages due to incompatibility with `CSS.escape()`
+Microsoft Edge and Safari will not display the chat's messages due to incompatibility with `CSS.escape()`
 
 ### Contents
 
@@ -33,3 +33,4 @@ You will find all client side code in static/script.js and all server side code 
 - Welcome message with user name is displayed in navbar
 - Channel list highlights with blue color the current active channel
 - Messages are displayed in chat when user enters/leaves channel and when users logs off
+- When a new message is displayed at the page, the page automaticaly scrolls down
