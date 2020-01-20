@@ -59,9 +59,13 @@ def joinChannel(data):
     if selectedChannel == 'empty':
         # joining a channel for the first time
         join_room(currentChannel)
-        if messagesArchive[currentChannel]:
-            messages = list(messagesArchive[currentChannel])
-            emit('receive previous messages', messages)
+        try:
+            if messagesArchive[currentChannel]:
+                messages = list(messagesArchive[currentChannel])
+                emit('receive previous messages', messages)
+        except KeyError:
+            emit('alert message', {'message': "Saved channel does not exist, please log off"}, room=request.sid)
+
         emit('return message', {'messageField': 'has joined the room ' + currentChannel, 'currentChannel': currentChannel, 'currentTime': data.get('currentTime'), 'user': data.get('user')}, room=currentChannel)
     else:
         # switching channels
