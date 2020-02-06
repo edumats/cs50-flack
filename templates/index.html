@@ -33,11 +33,12 @@
 
     <body>
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark border">
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark border">
             <a class="navbar-brand" href="/"><span class="text-white">Flack</span></a>
             <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav ml-auto mt-2">
                     <li class="nav-link text-light" id="welcome"></li>
@@ -55,7 +56,7 @@
         <div class="container-fluid">
             <div class="row">
                 <!-- Left Side bar -->
-                <nav class="col-md-3 bg-light sidebar">
+                <nav class="col-md-4 bg-light sidebar">
                     <h2>Channels</h2>
                     <div id="channelList" class="list-group">
                     </div>
@@ -67,9 +68,9 @@
                     </div>
                 </nav>
                 <!-- Chat contents -->
-                <main class="col-md-9" id="mainContent">
+                <main class="col-md-8" id="mainContent">
                     <div id="messagesList" class="list-group"></div>
-                    <div class="input-group mw-100 mt-2" id="messageInput">
+                    <div class="input-group mt-2" id="messageInput">
                         <input id="chatInput" class="form-control" autocomplete="off" autofocus/>
                         <div class="input-group-append">
                             <button id="sendButton" type="button" class="btn btn-primary">Send</button>

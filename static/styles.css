@@ -1,7 +1,7 @@
 body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: overflow;
 }
 
 .container-fluid main {
@@ -27,7 +27,15 @@ body {
 #messageInput {
     position: fixed;
     bottom: 15px;
-    width: 71vw;
+    width: 90vw;
+}
+
+@media (min-width: 768px) {
+    #messageInput {
+        position: fixed;
+        bottom: 15px;
+        width: 62vw;
+    }
 }
 
 /* Controls chat display area*/
@@ -37,5 +45,6 @@ body {
 
 /* Hides scroll x in messages area */
 #mainContent {
-    overflow-x: hidden;
+    overflow: auto;
+    height: 100%;
 }

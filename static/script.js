@@ -76,7 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
         div.append(span);
         document.getElementById('messagesList').append(div);
         const messagesWindow = document.querySelector('#mainContent');
-        messagesWindow.scrollTop = messagesWindow.scrollHeight;
+        //messagesWindow.scrollTop = messagesWindow.scrollHeight;
+        window.scrollTo(0, document.body.scrollHeight);
+        console.log(window.scrollY);
         //Source: http://sourcetricks.com/2010/07/javascript-scroll-to-bottom-of-page.html
     }
 
