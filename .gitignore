@@ -3,7 +3,7 @@
 
 # Virtual Environment
 env/
-
+venv/
 ### Flask ###
 instance/*
 !instance/.gitignore
