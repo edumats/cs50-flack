@@ -6,7 +6,7 @@ Click==7.0
 cryptography==3.3.2
 Flask==1.1.1
 Flask-SocketIO==4.2.1
-gunicorn==20.0.4
+https://github.com/benoitc/gunicorn/archive/refs/heads/master.zip#egg=gunicorn==20.1.0
 idna==2.8
 itsdangerous==1.1.0
 jellyfish==0.7.2
@@ -25,4 +25,4 @@ submit50==3.0.2
 termcolor==1.1.0
 urllib3==1.26.5
 Werkzeug==0.16.0
-eventlet
+eventlet>=0.31.0
