@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     $('#alertSystem').hide();
     // Connect to websocket
-    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+    const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
     // Prevents Enter key to submit all form inputs
     const formList = document.querySelectorAll('.inputForm');
@@ -31,13 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listens for clicks and submits message to server
     document.getElementById('sendButton').onclick = () => {
         const channel = localStorage.getItem('channel');
-        const message = document.getElementById('chatInput').value;
-        sendMessage(message, channel);
+        const message = document.getElementById('chatInput');
+        if (message.value.length > 0) {
+            sendMessage(message.value, channel)
+            message.value = '';
+        }
     }
 
     // Sends message through Enter key if not empty
     document.getElementById('chatInput').addEventListener('keyup', e => {
-        if (e.keyCode === 13) {
+        if (e.key === 'Enter') {
             const channel = localStorage.getItem('channel');
             const message = document.getElementById('chatInput');
             if (message.value.length > 0) {
@@ -72,12 +75,27 @@ document.addEventListener('DOMContentLoaded', () => {
         span.append(time);
         const p = document.createElement('p');
         p.innerHTML = '<strong>' + user + '</strong>' + ' ' + message;
+        color = stringToColour(user)
+        p.setAttribute('style', 'color: ' + color)
         div.append(p);
         div.append(span);
         document.getElementById('messagesList').append(div);
         const messagesWindow = document.querySelector('#mainContent');
         //messagesWindow.scrollTop = messagesWindow.scrollHeight;
         window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    const stringToColour = str => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        let colour = '#';
+        for (let i = 0; i < 3; i++) {
+            let value = (hash >> (i * 8)) & 0xFF;
+            colour += ('00' + value.toString(16)).slice(-2);
+        }
+        return colour;
     }
 
     /*
@@ -95,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const a = document.createElement('a');
             a.classList.add('singleChannel', 'list-group-item', 'list-group-item-action');
             a.setAttribute('data-channel', item);
+            a.setAttribute('style', 'cursor: pointer');
             a.innerHTML = item;
             document.querySelector('#channelList').append(a);
         })

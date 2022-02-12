@@ -42,7 +42,7 @@
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav ml-auto mt-2">
                     <li class="nav-link text-light" id="welcome"></li>
-                    <li class="nav-item" id="logoutLink"><a class="nav-link">Logout</a></li>
+                    <li class="nav-item" id="logoutLink"><a role="button" class="nav-link">Logout</a></li>
                 </ul>
             </div>
         </nav>
@@ -56,14 +56,14 @@
         <div class="container-fluid mt-3">
             <div class="row">
                 <!-- Left Side bar -->
-                <nav class="col-md-4 bg-light sidebar">
+                <nav class="col-md-4 sidebar">
                     <h2>Channels</h2>
                     <div id="channelList" class="list-group">
                     </div>
                     <div class="mt-2 input-group mw-100">
-                        <input id="channelName" class="form-control" autocomplete="off" placeholder="Add channel" autofocus/>
+                        <input id="channelName" class="form-control" autocomplete="off" placeholder="Create channel" autofocus/>
                         <div class="input-group-append">
-                            <button id="submitChannel" type="button" class="btn btn-primary">Add</button>
+                            <button id="submitChannel" type="button" class="btn btn-primary">Create</button>
                         </div>
                     </div>
                 </nav>

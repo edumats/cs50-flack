@@ -48,3 +48,11 @@ body {
     overflow: auto;
     height: 100%;
 }
+
+.active {
+    color: white !important;
+}
+
+#logoutLink {
+    cursor: pointer;
+}
